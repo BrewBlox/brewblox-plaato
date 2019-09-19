@@ -7,8 +7,9 @@ Any fixtures declared here are available to all test functions in this directory
 import logging
 
 import pytest
-
 from brewblox_service import service
+
+from brewblox_plaato.__main__ import create_parser
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -25,22 +26,34 @@ def app_config() -> dict:
         'host': 'localhost',
         'port': 1234,
         'debug': False,
+        'broadcast_interval': 30,
+        'broadcast_exchange': 'brewcast',
     }
 
 
 @pytest.fixture
 def sys_args(app_config) -> list:
-    return [
+    return [str(v) for v in [
         'app_name',
         '--name', app_config['name'],
         '--host', app_config['host'],
         '--port', str(app_config['port']),
-    ]
+        '--broadcast-interval', app_config['broadcast_interval'],
+        '--broadcast-exchange', app_config['broadcast_exchange'],
+    ]]
+
+
+@pytest.fixture
+def event_loop(loop):
+    # aresponses uses the "event_loop" fixture
+    # this makes loop available under either name
+    yield loop
 
 
 @pytest.fixture
 def app(sys_args):
-    app = service.create_app('default', raw_args=sys_args[1:])
+    parser = create_parser('default')
+    app = service.create_app(parser=parser, raw_args=sys_args[1:])
     return app
 
 
