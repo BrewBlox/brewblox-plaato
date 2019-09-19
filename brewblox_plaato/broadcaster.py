@@ -27,9 +27,6 @@ PINS = [
 ]
 
 
-LOGGER = brewblox_logger(__name__)
-
-
 def get_broadcaster(app: web.Application):
     return features.get(app, Broadcaster)
 
