@@ -4,15 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-brewblox-service = ">=0.15.0"
+brewblox-service = ">=0.19.0"
 
 [dev-packages]
+aresponses = "*"
 pytest-flake8 = "*"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-aiohttp = "*"
 asynctest = "*"
-aioresponses = "*"
 "flake8" = "*"
 "autopep8" = "*"
 brewblox-tools = "*"

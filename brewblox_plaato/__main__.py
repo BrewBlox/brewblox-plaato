@@ -22,9 +22,6 @@ def create_parser(default_name='plaato'):
     group.add_argument('--broadcast-exchange',
                        help='Eventbus exchange to which service state is broadcast. [%(default)s]',
                        default='brewcast')
-    group.add_argument('--volatile',
-                       action='store_true',
-                       help='Disable all outgoing network calls. [%(default)s]')
 
     return parser
 
