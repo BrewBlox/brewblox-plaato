@@ -18,6 +18,7 @@ asynctest = "*"
 pytest = "*"
 pytest-sugar = "*"
 brewblox-dev = "*"
+click = "*"
 
 [requires]
 python_version = "3.7"

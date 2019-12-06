@@ -30,15 +30,15 @@ async def publisher_mock(mocker):
 
 def plaato_resp(aresp: ResponsesMockServer):
 
-    def add(pin, val):
+    def add(pin, val, json=True):
         aresp.add(
             'plaato.blynk.cc', f'/xyz/get/{pin}', 'GET',
-            web.json_response(val)
+            web.json_response(val) if json else web.Response(body=val, content_type='application/json')
         )
 
     add('v102', 10)
     add('v103', ['17.5'])
-    add('v104', ['60.0'])
+    add('v104', '--', False)
     add('v105', ['1.055'])
     add('v106', ['1.04'])
     add('v107', ['37.5'])
@@ -74,7 +74,7 @@ async def test_run(app, publisher_mock, aresponses, client, token_mock):
         routing='test_app',
         message={
             'temperature[°C]': pytest.approx(17.5),
-            'volume[L]': pytest.approx(60.0),
+            'volume[L]': '--',
             'co2[L]': pytest.approx(0.2),
             'original_gravity[g/cm3]': pytest.approx(1.055),
             'specific_gravity[g/cm3]': pytest.approx(1.04),
