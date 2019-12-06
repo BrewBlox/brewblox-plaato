@@ -5,11 +5,12 @@ Intermittently broadcasts plaato state to the eventbus
 
 import asyncio
 from dataclasses import dataclass
+from json import JSONDecodeError
 from os import getenv
 
 from aiohttp import web
 from brewblox_service import (brewblox_logger, events, features, http_client,
-                              repeater)
+                              repeater, strex)
 
 LOGGER = brewblox_logger(__name__)
 AUTH_ENV_KEY = 'PLAATO_AUTH'
@@ -65,7 +66,11 @@ class Broadcaster(repeater.RepeaterFeature):
 
     async def _fetch(self, url):
         resp = await self.session.get(url)
-        val = await resp.json()
+        try:
+            val = await resp.json()
+        except JSONDecodeError as ex:
+            val = await resp.text()
+            LOGGER.debug(f'Failed to decode response "{val}" from {url}: {strex(ex)}')
 
         # We're dealing with the following types:
         # - int -> int

@@ -10,26 +10,14 @@ For the service to access your Plaato data, you'll need an authentication token.
 
 See https://plaato.io/apps/help-center#!hc-auth-token on how to get one.
 
-When you have that, edit your services by running `brewblox-ctl editor`.
+When you have that, download and run the install file on your Pi (in your brewblox dir):
 
-Add the new service:
-
-```yml
-  plaato:
-    # remove 'rpi-' if you're running on desktop
-    image: brewblox/brewblox-plaato:rpi-${BREWBLOX_RELEASE:-stable}
-    restart: unless-stopped
-    depends_on:
-      - eventbus
-    labels:
-      - "traefik.port=5000"
-      - "traefik.frontend.rule=PathPrefix: /plaato"
-    environment:
-      PLAATO_AUTH: "xyzabc1234" # Put your auth token here
-    command: >
-      --name=plaato
+```
+source .env
+curl -O https://raw.githubusercontent.com/BrewBlox/brewblox-plaato/${BREWBLOX_RELEASE}/install_plaato.py
+python3 install_plaato.py
 ```
 
-Start your services with `brewblox-ctl up`.
+This script will add the service, and run `brewblox-ctl up`.
 
-After a few seconds, you should see the `plaato` measurement appear in the Graph widget metrics.
+After a minute, you should see the `plaato` measurement appear in the Graph widget metrics.
