@@ -50,7 +50,7 @@ class PlaatoData:
     co2: float
 
     def serialize(self):
-        return {
+        values = {
             f'temperature[{self.temperature_unit}]': self.temperature,
             f'volume[{self.volume_unit}]': self.volume,
             f'co2[{self.volume_unit}]': self.co2,
@@ -60,6 +60,7 @@ class PlaatoData:
             'bpm': self.bpm,
             'bubbles': self.bubbles,
         }
+        return {k: v for k, v in values.items() if not isinstance(v, str)}
 
 
 class Broadcaster(repeater.RepeaterFeature):
