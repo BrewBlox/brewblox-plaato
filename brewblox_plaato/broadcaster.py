@@ -60,7 +60,7 @@ class PlaatoData:
             'bpm': self.bpm,
             'bubbles': self.bubbles,
         }
-        return {k: v for k, v in values.items() if not isinstance(v, str)}
+        return {k: (v if not isinstance(v, str) else None) for k, v in values.items()}
 
 
 class Broadcaster(repeater.RepeaterFeature):
