@@ -74,7 +74,7 @@ async def test_run(app, publisher_mock, aresponses, client, token_mock):
         routing='test_app',
         message={
             'temperature[°C]': pytest.approx(17.5),
-            'volume[L]': '--',
+            'volume[L]': None,
             'co2[L]': pytest.approx(0.2),
             'original_gravity[g/cm3]': pytest.approx(1.055),
             'specific_gravity[g/cm3]': pytest.approx(1.04),
