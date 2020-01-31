@@ -3,12 +3,11 @@ Tests brewblox_plaato.broadcaster
 """
 
 import asyncio
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from aiohttp import web
 from aresponses import ResponsesMockServer
-from asynctest import CoroutineMock
 from brewblox_service import http_client, repeater, scheduler
 
 from brewblox_plaato import broadcaster
@@ -24,7 +23,7 @@ def token_mock(mocker):
 @pytest.fixture
 async def publisher_mock(mocker):
     m = mocker.patch(TESTED + '.events.get_publisher')
-    m.return_value.publish = CoroutineMock()
+    m.return_value.publish = AsyncMock()
     return m.return_value
 
 

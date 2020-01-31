@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-brewblox-service = ">=0.19.0"
+brewblox-service = ">=0.21.0"
 
 [dev-packages]
 aresponses = "*"
@@ -12,7 +12,6 @@ pytest-flake8 = "*"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-aiohttp = "*"
-asynctest = "*"
 "flake8" = "*"
 "autopep8" = "*"
 pytest = "*"
@@ -21,4 +20,4 @@ brewblox-dev = "*"
 click = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
