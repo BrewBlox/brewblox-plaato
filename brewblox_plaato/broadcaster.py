@@ -9,7 +9,8 @@ from json import JSONDecodeError
 from os import getenv
 
 from aiohttp import web
-from brewblox_service import (brewblox_logger, events, features, http_client,
+
+from brewblox_service import (brewblox_logger, events, features, http,
                               repeater, strex)
 
 LOGGER = brewblox_logger(__name__)
@@ -26,14 +27,6 @@ PINS = [
     'v110',  # bubbles
     'v119',  # co2
 ]
-
-
-def get_broadcaster(app: web.Application):
-    return features.get(app, Broadcaster)
-
-
-def setup(app: web.Application):
-    features.add(app, Broadcaster(app))
 
 
 @dataclass
@@ -66,7 +59,7 @@ class PlaatoData:
 class Broadcaster(repeater.RepeaterFeature):
 
     async def _fetch(self, url):
-        resp = await self.session.get(url)
+        resp = await http.session(self.app).get(url)
         try:
             val = await resp.json()
         except JSONDecodeError as ex:
@@ -91,9 +84,6 @@ class Broadcaster(repeater.RepeaterFeature):
         if self.interval <= 0:
             raise repeater.RepeaterCancelled()
 
-        self.session = http_client.get_client(self.app).session
-        self.publisher = events.get_publisher(self.app)
-
         token = getenv(AUTH_ENV_KEY)
         if token is None:
             raise KeyError(f'Plaato auth token not added as env variable (key={AUTH_ENV_KEY})')
@@ -107,8 +97,15 @@ class Broadcaster(repeater.RepeaterFeature):
         data = PlaatoData(*responses)
         LOGGER.debug(data)
 
-        await self.publisher.publish(
-            exchange=self.exchange,
-            routing=self.name,
-            message=data.serialize()
-        )
+        await events.publish(self.app,
+                             exchange=self.exchange,
+                             routing=self.name,
+                             message=data.serialize())
+
+
+def setup(app: web.Application):
+    features.add(app, Broadcaster(app))
+
+
+def get_broadcaster(app: web.Application) -> Broadcaster:
+    return features.get(app, Broadcaster)

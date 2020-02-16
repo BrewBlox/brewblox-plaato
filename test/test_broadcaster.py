@@ -8,9 +8,9 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from aiohttp import web
 from aresponses import ResponsesMockServer
-from brewblox_service import http_client, repeater, scheduler
 
 from brewblox_plaato import broadcaster
+from brewblox_service import http, repeater, scheduler
 
 TESTED = broadcaster.__name__
 
@@ -21,10 +21,9 @@ def token_mock(mocker):
 
 
 @pytest.fixture
-async def publisher_mock(mocker):
-    m = mocker.patch(TESTED + '.events.get_publisher')
-    m.return_value.publish = AsyncMock()
-    return m.return_value
+async def m_publish(mocker):
+    m = mocker.patch(TESTED + '.events.publish', AsyncMock())
+    return m
 
 
 def plaato_resp(aresp: ResponsesMockServer):
@@ -48,10 +47,10 @@ def plaato_resp(aresp: ResponsesMockServer):
 
 
 @pytest.fixture
-def app(app, publisher_mock):
+def app(app, m_publish):
     app['config']['broadcast_interval'] = 0.001
     scheduler.setup(app)
-    http_client.setup(app)
+    http.setup(app)
     return app
 
 
@@ -62,13 +61,14 @@ def setup_broadcaster(app, aresponses):
         plaato_resp(aresponses)
 
 
-async def test_run(app, publisher_mock, aresponses, client, token_mock):
+async def test_run(app, m_publish, aresponses, client, token_mock):
     plaato_resp(aresponses)
     caster = broadcaster.Broadcaster(app)
     await caster.prepare()
     await caster.run()
 
-    publisher_mock.publish.assert_called_with(
+    m_publish.assert_awaited_with(
+        app,
         exchange='brewcast',
         routing='test_app',
         message={
@@ -83,10 +83,10 @@ async def test_run(app, publisher_mock, aresponses, client, token_mock):
         })
 
 
-async def test_setup(app, setup_broadcaster, publisher_mock, token_mock, client):
+async def test_setup(app, setup_broadcaster, m_publish, token_mock, client):
     assert broadcaster.get_broadcaster(app)
     await asyncio.sleep(0.1)
-    assert publisher_mock.publish.call_count > 1
+    assert m_publish.call_count > 1
 
 
 async def test_token_error(app, client):

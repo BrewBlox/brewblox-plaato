@@ -2,10 +2,8 @@
 Example of how to import and use the brewblox service
 """
 
-from brewblox_service import (brewblox_logger, events, http_client, scheduler,
-                              service)
-
 from brewblox_plaato import broadcaster
+from brewblox_service import brewblox_logger, events, http, scheduler, service
 
 LOGGER = brewblox_logger(__name__)
 
@@ -31,7 +29,7 @@ def main():
 
     scheduler.setup(app)
     events.setup(app)
-    http_client.setup(app)
+    http.setup(app)
     broadcaster.setup(app)
 
     service.furnish(app)
