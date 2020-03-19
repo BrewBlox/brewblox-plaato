@@ -20,7 +20,6 @@ Notes:
 
 import re
 from os import path
-from platform import machine
 from subprocess import check_call
 
 import click
@@ -64,9 +63,8 @@ def install(name, token, force):
         print('Service "{}" already exists. Use the --force flag if you want to overwrite it'.format(name))
         return
 
-    prefix = 'rpi-' if machine().startswith('arm') else ''
     config['services'][name] = {
-        'image': 'brewblox/brewblox-plaato:{}{}'.format(prefix, '${BREWBLOX_RELEASE}'),
+        'image': 'brewblox/brewblox-plaato:${BREWBLOX_RELEASE}',
         'restart': 'unless-stopped',
         'labels': [
             'traefik.port=5000',
