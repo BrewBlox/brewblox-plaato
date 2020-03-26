@@ -3,14 +3,14 @@ Tests brewblox_plaato.broadcaster
 """
 
 import asyncio
-from unittest.mock import AsyncMock, Mock
 
 import pytest
 from aiohttp import web
 from aresponses import ResponsesMockServer
+from brewblox_service import http, repeater, scheduler
+from mock import AsyncMock, Mock
 
 from brewblox_plaato import broadcaster
-from brewblox_service import http, repeater, scheduler
 
 TESTED = broadcaster.__name__
 
