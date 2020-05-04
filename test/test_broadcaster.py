@@ -21,7 +21,7 @@ def token_mock(mocker):
 
 
 @pytest.fixture
-async def m_publish(mocker):
+def m_publish(mocker):
     m = mocker.patch(TESTED + '.events.publish', AsyncMock())
     return m
 
