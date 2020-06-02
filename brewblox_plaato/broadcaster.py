@@ -9,9 +9,8 @@ from json import JSONDecodeError
 from os import getenv
 
 from aiohttp import web
-
-from brewblox_service import (brewblox_logger, events, features, http,
-                              repeater, strex)
+from brewblox_service import (brewblox_logger, features, http, mqtt, repeater,
+                              strex)
 
 LOGGER = brewblox_logger(__name__)
 AUTH_ENV_KEY = 'PLAATO_AUTH'
@@ -79,7 +78,7 @@ class Broadcaster(repeater.RepeaterFeature):
     async def prepare(self):
         self.name = self.app['config']['name']
         self.interval = self.app['config']['broadcast_interval']
-        self.exchange = self.app['config']['broadcast_exchange']
+        self.topic = self.app['config']['history_topic'] + '/plaato'
 
         if self.interval <= 0:
             raise repeater.RepeaterCancelled()
@@ -97,10 +96,10 @@ class Broadcaster(repeater.RepeaterFeature):
         data = PlaatoData(*responses)
         LOGGER.debug(data)
 
-        await events.publish(self.app,
-                             exchange=self.exchange,
-                             routing=self.name,
-                             message=data.serialize())
+        await mqtt.publish(self.app,
+                           self.topic,
+                           {'key': self.name,
+                            'data': data.serialize()})
 
 
 def setup(app: web.Application):
