@@ -7,9 +7,9 @@ Any fixtures declared here are available to all test functions in this directory
 import logging
 
 import pytest
+from brewblox_service import service
 
 from brewblox_plaato.__main__ import create_parser
-from brewblox_service import service
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -27,7 +27,6 @@ def app_config() -> dict:
         'port': 1234,
         'debug': False,
         'broadcast_interval': 30,
-        'broadcast_exchange': 'brewcast',
     }
 
 
@@ -39,7 +38,6 @@ def sys_args(app_config) -> list:
         '--host', app_config['host'],
         '--port', str(app_config['port']),
         '--broadcast-interval', app_config['broadcast_interval'],
-        '--broadcast-exchange', app_config['broadcast_exchange'],
     ]]
 
 

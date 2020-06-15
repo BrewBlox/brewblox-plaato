@@ -22,7 +22,7 @@ def token_mock(mocker):
 
 @pytest.fixture
 def m_publish(mocker):
-    m = mocker.patch(TESTED + '.events.publish', AsyncMock())
+    m = mocker.patch(TESTED + '.mqtt.publish', AsyncMock())
     return m
 
 
@@ -69,17 +69,19 @@ async def test_run(app, m_publish, aresponses, client, token_mock):
 
     m_publish.assert_awaited_with(
         app,
-        exchange='brewcast',
-        routing='test_app',
-        message={
-            'temperature[°C]': pytest.approx(17.5),
-            'volume[L]': None,
-            'co2[L]': pytest.approx(0.2),
-            'original_gravity[g/cm3]': pytest.approx(1.055),
-            'specific_gravity[g/cm3]': pytest.approx(1.04),
-            'abv': pytest.approx(37.5),
-            'bpm': 10,
-            'bubbles': 42,
+        'brewcast/history/plaato',
+        {
+            'key': 'test_app',
+            'data': {
+                'temperature[°C]': pytest.approx(17.5),
+                'volume[L]': None,
+                'co2[L]': pytest.approx(0.2),
+                'original_gravity[g/cm3]': pytest.approx(1.055),
+                'specific_gravity[g/cm3]': pytest.approx(1.04),
+                'abv': pytest.approx(37.5),
+                'bpm': 10,
+                'bubbles': 42,
+            },
         })
 
 
