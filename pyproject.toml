@@ -21,7 +21,6 @@ autopep8 = "^1.5"
 pytest = "^5.4.1"
 brewblox-dev = "^1.4.0"
 flake8-quotes = "^3.0.0"
-click = "^7.1.1"
 asyncmock = "^0.4.2"
 
 [build-system]
