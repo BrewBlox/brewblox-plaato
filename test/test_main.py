@@ -11,5 +11,5 @@ def test_main(mocker, app):
     main.main()
 
     assert None not in [
-        broadcaster.get_broadcaster(app)
+        broadcaster.fget(app)
     ]

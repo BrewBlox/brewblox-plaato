@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.7"
-brewblox-service = "^0.28.0"
+brewblox-service = "^0.32.1"
 
 [tool.poetry.dev-dependencies]
 aresponses = "^2.0.0"
@@ -19,7 +19,6 @@ pytest-aiohttp = "^0.3.0"
 flake8 = "^3.7.9"
 autopep8 = "^1.5"
 pytest = "^5.4.1"
-brewblox-dev = "^1.4.0"
 flake8-quotes = "^3.0.0"
 asyncmock = "^0.4.2"
 

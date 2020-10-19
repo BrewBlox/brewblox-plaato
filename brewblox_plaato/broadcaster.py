@@ -106,5 +106,5 @@ def setup(app: web.Application):
     features.add(app, Broadcaster(app))
 
 
-def get_broadcaster(app: web.Application) -> Broadcaster:
+def fget(app: web.Application) -> Broadcaster:
     return features.get(app, Broadcaster)

@@ -86,7 +86,7 @@ async def test_run(app, m_publish, aresponses, client, token_mock):
 
 
 async def test_setup(app, setup_broadcaster, m_publish, token_mock, client):
-    assert broadcaster.get_broadcaster(app)
+    assert broadcaster.fget(app)
     await asyncio.sleep(0.1)
     assert m_publish.call_count > 1
 
