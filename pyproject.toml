@@ -8,11 +8,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4"
-brewblox-service = "^0.34.0"
+brewblox-service = "^1.0.1"
 
 [tool.poetry.dev-dependencies]
 aresponses = "*"
-pytest-flake8 = "*"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-aiohttp = "*"
