@@ -4,6 +4,7 @@ Intermittently broadcasts plaato state to the eventbus
 
 
 import asyncio
+import json
 from dataclasses import dataclass
 from json import JSONDecodeError
 from os import getenv
@@ -98,8 +99,8 @@ class Broadcaster(repeater.RepeaterFeature):
 
         await mqtt.publish(self.app,
                            self.topic,
-                           {'key': self.name,
-                            'data': data.serialize()})
+                           json.dumps({'key': self.name,
+                                       'data': data.serialize()}))
 
 
 def setup(app: web.Application):
