@@ -3,6 +3,7 @@ Tests brewblox_plaato.broadcaster
 """
 
 import asyncio
+import json
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -70,19 +71,19 @@ async def test_run(app, m_publish, aresponses, client, token_mock):
     m_publish.assert_awaited_with(
         app,
         'brewcast/history/plaato',
-        {
+        json.dumps({
             'key': 'test_app',
             'data': {
-                'temperature[°C]': pytest.approx(17.5),
+                'temperature[°C]': 17.5,
                 'volume[L]': None,
-                'co2[L]': pytest.approx(0.2),
-                'original_gravity[g/cm3]': pytest.approx(1.055),
-                'specific_gravity[g/cm3]': pytest.approx(1.04),
-                'abv': pytest.approx(37.5),
-                'bpm': 10,
-                'bubbles': 42,
+                'co2[L]': 0.2,
+                'original_gravity[g/cm3]': 1.055,
+                'specific_gravity[g/cm3]': 1.04,
+                'abv': 37.5,
+                'bpm': 10.0,
+                'bubbles': 42.0,
             },
-        })
+        }))
 
 
 async def test_setup(app, setup_broadcaster, m_publish, token_mock, client):
