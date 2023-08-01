@@ -1,15 +1,12 @@
 from brewblox_plaato import __main__ as main
-from brewblox_plaato import broadcaster
 
 TESTED = main.__name__
 
 
-def test_main(mocker, app):
-    mocker.patch(TESTED + '.service.run')
-    mocker.patch(TESTED + '.service.create_app').return_value = app
+def test_main(event_loop, mocker, sys_args):
+    def mock_run(app, coro):
+        event_loop.run_until_complete(coro)
 
+    mocker.patch.object(main.service.sys, 'argv', sys_args)
+    mocker.patch(TESTED + '.service.run_app', mock_run)
     main.main()
-
-    assert None not in [
-        broadcaster.fget(app)
-    ]
