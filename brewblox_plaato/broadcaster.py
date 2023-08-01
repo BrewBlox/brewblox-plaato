@@ -13,6 +13,8 @@ from aiohttp import web
 from brewblox_service import (brewblox_logger, features, http, mqtt, repeater,
                               strex)
 
+from brewblox_plaato.models import ServiceConfig
+
 LOGGER = brewblox_logger(__name__)
 AUTH_ENV_KEY = 'PLAATO_AUTH'
 PINS = [
@@ -77,9 +79,11 @@ class Broadcaster(repeater.RepeaterFeature):
             return val
 
     async def prepare(self):
-        self.name = self.app['config']['name']
-        self.interval = self.app['config']['broadcast_interval']
-        self.topic = self.app['config']['history_topic'] + '/plaato'
+        config: ServiceConfig = self.app['config']
+
+        self.name = config.name
+        self.interval = config.broadcast_interval
+        self.topic = f'{config.history_topic}/plaato'
 
         if self.interval <= 0:
             raise repeater.RepeaterCancelled()
@@ -98,13 +102,13 @@ class Broadcaster(repeater.RepeaterFeature):
         LOGGER.debug(data)
 
         await mqtt.publish(self.app,
-                           self.topic,
-                           json.dumps({'key': self.name,
-                                       'data': data.serialize()}))
+                           topic=self.topic,
+                           payload=json.dumps({'key': self.name,
+                                               'data': data.serialize()}))
 
 
-def setup(app: web.Application):
-    features.add(app, Broadcaster(app))
+def setup(app: web.Application, **kwargs):
+    features.add(app, Broadcaster(app, **kwargs))
 
 
 def fget(app: web.Application) -> Broadcaster:
