@@ -5,12 +5,13 @@ Example of how to import and use the brewblox service
 from brewblox_service import brewblox_logger, http, mqtt, scheduler, service
 
 from brewblox_plaato import broadcaster
+from brewblox_plaato.models import ServiceConfig
 
 LOGGER = brewblox_logger(__name__)
 
 
-def create_parser(default_name='plaato'):
-    parser = service.create_parser(default_name=default_name)
+def create_parser():
+    parser = service.create_parser('plaato')
 
     # Service network options
     group = parser.add_argument_group('Service communication')
@@ -23,15 +24,17 @@ def create_parser(default_name='plaato'):
 
 
 def main():
-    app = service.create_app(parser=create_parser())
+    parser = create_parser()
+    config = service.create_config(parser, model=ServiceConfig)
+    app = service.create_app(config)
 
-    scheduler.setup(app)
-    mqtt.setup(app)
-    http.setup(app)
-    broadcaster.setup(app)
+    async def setup():
+        scheduler.setup(app)
+        mqtt.setup(app)
+        http.setup(app)
+        broadcaster.setup(app)
 
-    service.furnish(app)
-    service.run(app)
+    service.run_app(app, setup())
 
 
 if __name__ == '__main__':

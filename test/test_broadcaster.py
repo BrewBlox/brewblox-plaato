@@ -4,31 +4,31 @@ Tests brewblox_plaato.broadcaster
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import Mock
 
 import pytest
 from aiohttp import web
 from aresponses import ResponsesMockServer
-from brewblox_service import http, repeater, scheduler
+from brewblox_service import http, mqtt, repeater, scheduler
 
 from brewblox_plaato import broadcaster
+from brewblox_plaato.models import ServiceConfig
 
 TESTED = broadcaster.__name__
 
 
 @pytest.fixture
-def token_mock(mocker):
-    mocker.patch(TESTED + '.getenv', Mock(return_value='xyz'))
-
-
-@pytest.fixture
 def m_publish(mocker):
-    m = mocker.patch(TESTED + '.mqtt.publish', AsyncMock())
+    m = mocker.spy(mqtt, 'publish')
     return m
 
 
-def plaato_resp(aresp: ResponsesMockServer):
+@pytest.fixture
+def m_token(mocker):
+    mocker.patch(TESTED + '.getenv', Mock(return_value='xyz'))
 
+
+def plaato_resp(aresp: ResponsesMockServer):
     def add(pin, val, json=True):
         aresp.add(
             'plaato.blynk.cc', f'/xyz/get/{pin}', 'GET',
@@ -48,30 +48,33 @@ def plaato_resp(aresp: ResponsesMockServer):
 
 
 @pytest.fixture
-def app(app, m_publish):
-    app['config']['broadcast_interval'] = 0.001
+async def setup(app, broker):
+    config: ServiceConfig = app['config']
+    config.broadcast_interval = 0.001
+    config.mqtt_host = 'localhost'
+    config.mqtt_port = broker['mqtt']
+
     scheduler.setup(app)
+    mqtt.setup(app)
     http.setup(app)
-    return app
+    broadcaster.setup(app, autostart=False)
 
 
-@pytest.fixture
-def setup_broadcaster(app, aresponses):
-    broadcaster.setup(app)
-    for i in range(100):
-        plaato_resp(aresponses)
+@pytest.fixture(autouse=True)
+async def synchronized(app, client):
+    await asyncio.wait_for(mqtt.fget(app).ready.wait(), timeout=5)
 
 
-async def test_run(app, m_publish, aresponses, client, token_mock):
+async def test_run(app, client, m_publish, m_token, aresponses):
+    c = broadcaster.fget(app)
     plaato_resp(aresponses)
-    caster = broadcaster.Broadcaster(app)
-    await caster.prepare()
-    await caster.run()
+    await c.prepare()
+    await c.run()
 
     m_publish.assert_awaited_with(
         app,
-        'brewcast/history/plaato',
-        json.dumps({
+        topic='brewcast/history/plaato',
+        payload=json.dumps({
             'key': 'test_app',
             'data': {
                 'temperature[°C]': 17.5,
@@ -86,20 +89,14 @@ async def test_run(app, m_publish, aresponses, client, token_mock):
         }))
 
 
-async def test_setup(app, setup_broadcaster, m_publish, token_mock, client):
-    assert broadcaster.fget(app)
-    await asyncio.sleep(0.1)
-    assert m_publish.call_count > 1
-
-
 async def test_token_error(app, client):
-    caster = broadcaster.Broadcaster(app)
+    c = broadcaster.fget(app)
     with pytest.raises(KeyError, match=r'Plaato auth token'):
-        await caster.prepare()
+        await c.prepare()
 
 
-async def test_cancel(app, client, token_mock):
-    app['config']['broadcast_interval'] = 0
-    caster = broadcaster.Broadcaster(app)
+async def test_cancel(app, client):
+    app['config'].broadcast_interval = 0
+    c = broadcaster.fget(app)
     with pytest.raises(repeater.RepeaterCancelled):
-        await caster.prepare()
+        await c.prepare()
